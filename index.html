@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>O Mapa da Grand Line — Uma Aventura Para Você</title>
+<meta name="description" content="Uma caça ao tesouro cinematográfica feita especialmente para uma pessoa especial.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" onerror="this.remove()">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ CÉU DINÂMICO (fundo persistente) ============ -->
+<div id="sky" aria-hidden="true">
+  <div id="sunset-glow"></div>
+  <div id="sun"></div>
+  <div id="moon"></div>
+  <div id="stars"></div>
+  <div id="clouds"></div>
+  <canvas id="particles"></canvas>
+</div>
+<div id="ocean-bg" aria-hidden="true">
+  <div class="wave-layer wave-back"></div>
+  <div class="wave-layer wave-front"></div>
+</div>
+
+<!-- ============ HUD DE HORÁRIO ============ -->
+<div id="hud-clock" class="hud-corner" role="status" aria-live="off">
+  <span id="hud-time">--:--</span>
+  <span id="hud-phase">🌅 Manhã</span>
+</div>
+
+<!-- ============ HUD DE PROGRESSO (aparece após o início) ============ -->
+<header id="hud-progress" class="hud-corner hud-hidden" aria-label="Progresso da aventura">
+  <button id="btn-diary" class="hud-btn" aria-label="Abrir diário da capitã">📖 Diário</button>
+  <button id="btn-music" class="hud-btn" aria-label="Ligar ou desligar a música">🎵</button>
+  <div class="hud-stats">
+    <span>💰 <span id="stat-berries">0</span></span>
+    <span>🗺️ <span id="stat-fragments">0</span>/8</span>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ TELA 1 — ABERTURA CINEMATOGRÁFICA ============ -->
+  <section id="screen-opening" class="screen screen-center" aria-live="polite">
+    <div class="scroll-frame">
+      <p class="opening-line" data-delay="0">Há muito tempo, alguém encontrou um mapa...</p>
+      <p class="opening-line" data-delay="1">Mas esse não era um mapa comum.</p>
+      <p class="opening-line" data-delay="2">Ele levava ao maior tesouro de todos.</p>
+    </div>
+    <button id="btn-accept" class="btn-gold opening-line" data-delay="3">Aceitar a Aventura ⚓</button>
+  </section>
+
+  <!-- ============ TELA 2 — CARTA DO CAPITÃO ============ -->
+  <section id="screen-letter" class="screen screen-center hidden">
+    <article class="parchment" aria-label="Carta da Capitã">
+      <h1 class="parchment-title">Carta da Capitã</h1>
+      <div class="parchment-body">
+        <p>Capitã,</p>
+        <p>Você foi escolhida para uma missão que poucas conseguiriam completar.</p>
+        <p>Existe um tesouro escondido no fim da Grand Line.</p>
+        <p>Mas existe uma regra...</p>
+        <p>Você só poderá encontrá-lo se conseguir atravessar todas as ilhas.</p>
+        <p>Em cada ilha existe uma pista.</p>
+        <p>Algumas exigirão coragem.</p>
+        <p>Outras, memória.</p>
+        <p>E algumas... talvez façam seu coração bater um pouco mais rápido.</p>
+      </div>
+      <button id="btn-start-journey" class="btn-gold">Começar a Viagem</button>
+    </article>
+  </section>
+
+  <!-- ============ TELA 3 — MAPA (HUB PRINCIPAL) ============ -->
+  <section id="screen-map" class="screen hidden">
+    <div class="bond-meter" aria-label="Medidor de vínculo">
+      <span class="bond-label">❤️ Vínculo</span>
+      <div class="bond-track"><div id="bond-fill" class="bond-fill"></div></div>
+      <span id="bond-percent">0%</span>
+      <p id="bond-caption" class="bond-caption">O vento ainda nem começou a soprar.</p>
+    </div>
+
+    <div id="map-viewport" class="map-viewport">
+      <div id="map-fog" class="map-fog" aria-hidden="true"></div>
+      <div id="map-canvas" class="map-canvas">
+        <svg id="map-routes" class="map-routes" viewBox="0 0 1600 1000" preserveAspectRatio="none" aria-hidden="true">
+          <path id="route-path" d="" />
+        </svg>
+
+        <div id="ship" class="ship" aria-hidden="true">
+          <div class="ship-hull"></div>
+          <div class="ship-sail ship-sail-main"></div>
+          <div class="ship-sail ship-sail-fore"></div>
+          <div class="ship-mast"></div>
+          <div class="ship-lantern ship-lantern-l"></div>
+          <div class="ship-lantern ship-lantern-r"></div>
+        </div>
+
+        <div id="compass" class="compass" tabindex="0" role="button" aria-label="Bússola — gire para explorar">
+          <div class="compass-needle"></div>
+        </div>
+
+        <!-- Ilhas geradas dinamicamente via JS em #islands-layer -->
+        <div id="islands-layer" class="islands-layer"></div>
+      </div>
+    </div>
+
+    <p class="map-hint">Toque em uma ilha ✨ para explorar. Arraste para navegar pelo mapa.</p>
+  </section>
+
+  <!-- ============ TELA 4 — LAUGH TALE (FINAL) ============ -->
+  <section id="screen-laughtale" class="screen screen-center hidden">
+    <div class="laughtale-scene">
+      <p class="laughtale-line" data-delay="0">Você chegou ao fim da Grand Line.</p>
+      <p class="laughtale-line" data-delay="1">Durante toda essa jornada, você procurou por ouro.</p>
+      <p class="laughtale-line" data-delay="2">Procurou por pistas.</p>
+      <p class="laughtale-line" data-delay="3">Procurou pelo maior tesouro do mundo.</p>
+      <p class="laughtale-line laughtale-pause" data-delay="4">Mas talvez tenha procurado no lugar errado.</p>
+      <button id="btn-open-x" class="treasure-x laughtale-line" data-delay="5" aria-label="Cavar onde o X marca o tesouro">✕</button>
+    </div>
+  </section>
+
+  <!-- ============ TELA 5 — BAÚ / CARTA FINAL ============ -->
+  <section id="screen-chest" class="screen screen-center hidden">
+    <div id="chest" class="chest">
+      <div class="chest-glow"></div>
+      <div class="chest-lid"></div>
+      <div class="chest-base"></div>
+    </div>
+    <article id="final-letter" class="parchment final-letter hidden">
+      <h1 class="parchment-title" id="final-letter-title">Querida —</h1>
+      <div class="parchment-body" id="final-letter-body"></div>
+      <button id="btn-see-summary" class="btn-gold">Ver o Resumo da Jornada</button>
+    </article>
+  </section>
+
+  <!-- ============ TELA 6 — RESUMO + FINAL ESPECIAL ============ -->
+  <section id="screen-final" class="screen screen-center hidden">
+    <canvas id="fireworks" aria-hidden="true"></canvas>
+    <div class="final-content">
+      <div class="summary-card" id="summary-card"></div>
+      <h1 class="final-title">A minha aventura favorita é você.</h1>
+      <p class="final-sub">Fim da caça ao tesouro. Mas não da nossa aventura.</p>
+      <div class="relationship-counter" id="relationship-counter" aria-label="Tempo de relacionamento"></div>
+      <button id="btn-final-clue" class="btn-gold hidden">Existe uma última pista ⚓</button>
+      <div id="final-clue-box" class="final-clue-box hidden"></div>
+      <button id="btn-restart" class="btn-ghost">Recomeçar a Aventura</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ MODAL — ILHA / MINIJOGO ============ -->
+<dialog id="modal-island" class="modal" aria-labelledby="modal-island-title">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-island-close" aria-label="Fechar">✕</button>
+    <h2 id="modal-island-title" class="modal-title"></h2>
+    <div id="modal-island-body" class="modal-body"></div>
+  </div>
+</dialog>
+
+<!-- ============ MODAL — DIÁRIO DO CAPITÃO ============ -->
+<dialog id="modal-diary" class="modal" aria-labelledby="modal-diary-title">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-diary-close" aria-label="Fechar diário">✕</button>
+    <h2 id="modal-diary-title" class="modal-title">📖 Diário da Capitã</h2>
+    <div id="diary-list" class="diary-list"></div>
+  </div>
+</dialog>
+
+<!-- ============ MODAL — CARTA / GARRAFA ============ -->
+<dialog id="modal-letter" class="modal" aria-labelledby="modal-letter-title">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-letter-close" aria-label="Fechar carta">✕</button>
+    <article class="parchment parchment-inline">
+      <h2 id="modal-letter-title" class="parchment-title"></h2>
+      <div id="modal-letter-body" class="parchment-body"></div>
+    </article>
+  </div>
+</dialog>
+
+<!-- ============ MODAL — CONFIRMAR REINÍCIO ============ -->
+<dialog id="modal-reset" class="modal" aria-labelledby="modal-reset-title">
+  <div class="modal-inner modal-inner-small">
+    <h2 id="modal-reset-title" class="modal-title">Recomeçar tudo?</h2>
+    <p>Isso vai apagar seu progresso, moedas e memórias encontradas. Não é possível desfazer.</p>
+    <div class="modal-actions">
+      <button id="btn-reset-cancel" class="btn-ghost">Cancelar</button>
+      <button id="btn-reset-confirm" class="btn-danger">Recomeçar</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Garrafa flutuante -->
+<button id="bottle" class="bottle hidden" aria-label="Uma garrafa chegou ao mar — clique para abrir">🍾</button>
+
+<!-- Áudio (opcional — o site funciona sem estes arquivos) -->
+<audio id="audio-menu" loop preload="none"><source src="assets/Ariana Grande - bad thing.mp3" type="audio/mpeg"></audio>
+<audio id="audio-aventura" loop preload="none"><source src="assets/Ariana Grande - bad thing.mp3" type="audio/mpeg"></audio>
+<audio id="audio-romantica" loop preload="none"><source src="assets/Ariana Grande - bad thing.mp3" type="audio/mpeg"></audio>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
