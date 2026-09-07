@@ -99,7 +99,7 @@ const CONFIG = {
   ],
 
   // Frase de destaque, exibida em maior evidência logo depois da mensagem final.
-  mensagemFinalDestaque: "Em você. Você é o meu maior tesouro, e ainda teremos muitas aventuras juntosv. ❤️",
+  mensagemFinalDestaque: "Em você. Você é o meu maior tesouro, e ainda teremos muitas aventuras juntos. ❤️",
 
   /* ---------- PISTA FÍSICA / SURPRESA REAL (opcional) ---------- */
   // Se preenchido, um botão "Existe uma última pista ⚓" aparece na tela final.
